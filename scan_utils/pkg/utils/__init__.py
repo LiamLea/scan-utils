@@ -23,3 +23,5 @@ from .utility import version_format
 from .process import parse_pid_relation
 
 from .wmi import WMIC
+
+from .diff import diff_files
