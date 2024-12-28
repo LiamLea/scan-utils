@@ -1,0 +1,6 @@
+easysnmp==0.2.5
+kafka_python==2.0.1
+paramiko==3.5.0
+PyMySQL==0.10.0
+sh==2.1.0
+wmi_client_wrapper==0.0.12
