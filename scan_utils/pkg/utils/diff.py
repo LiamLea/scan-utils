@@ -3,7 +3,7 @@ from difflib import unified_diff
 from rich.console import Console
 
 
-def diff_files(file1, file2):
+def diff_files(file1, file2, output=""):
     # Read the files
     with open(file1, 'r') as f1, open(file2, 'r') as f2:
         file1_lines = f1.readlines()
@@ -17,7 +17,7 @@ def diff_files(file1, file2):
     )
 
     # Create a console with forced color support
-    console = Console(force_terminal=True)
+    console = Console(force_terminal=True, record=True)
 
     # Print the differences with colors
     for line in diff:
@@ -34,3 +34,7 @@ def diff_files(file1, file2):
             console.print(line, style="yellow")
         else:
             console.print(f"[dim]{line}[/dim]")  # Default style for unchanged lines
+
+    if output != "":
+        with open(output, 'w') as output:
+            output.write(console.export_text())
