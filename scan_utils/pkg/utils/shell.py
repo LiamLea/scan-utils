@@ -9,16 +9,17 @@ class SHELL:
 
     def __init__(self, ssh = "", passwd = "", local = False):
         # self.local是一个开关，用于控制是远程shell还是本地shell
+        # ssh = SSH(credential_info["host"], credential_info["port"], credential_info["username"], credential_info["password"])
         self.local = local
         self.ssh = ssh
         self.sudo_passwd = passwd
         self.comment_pattern = re.compile(r"^\s*#")
 
-    def exec_shell(self, command, get_error=False, get_comments = False, timeout = 30, get_dict = False):
+    def exec_shell(self, command, get_error=False, get_comments = False, timeout = 30, get_dict = False, **kwargs):
 
         if self.local:
-
-            result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            # common args: env, cwd
+            result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)
             if get_error:
                 ret = [i for i in result.stderr.decode().split('\n') if i != '']
                 return ret
