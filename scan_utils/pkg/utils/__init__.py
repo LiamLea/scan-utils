@@ -10,7 +10,8 @@ from .utility import string_to_bytes
 
 from .snmp import SNMP
 from .snmp import get_portlist_from_hex
-from .database import DB
+from .database import MysqlDB
+from .database import PostgreDB
 
 from .utility import get_ip_from_hostname
 from .utility import get_local_ip

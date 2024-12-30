@@ -4,9 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "scan-utils"
-version = "0.0.7"
+version = "0.0.8"
 authors = [
-  { name="LiamLea", email="liweixiliang@gmail.com" },
+    { name = "LiamLea", email = "liweixiliang@gmail.com" },
 ]
 description = "uitls for scan service"
 readme = "README.md"
