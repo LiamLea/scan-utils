@@ -1,3 +1,3 @@
 .idea
-.dist
-.scan_utils.egg-info
+dist
+scan_utils.egg-info
