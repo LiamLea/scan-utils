@@ -54,21 +54,11 @@ class PostgreDB:
             return cursor.fetchmany(num)
 
     def get_meta_info(self):
-        old_conn = self.conn
-        self.conn = psycopg2.connect(
-            database="postgres",
-            user=self.db_info["db_user"],
-            password=self.db_info["passwd"],
-            host=self.db_info["host"],
-            port=self.db_info["port"],
-        )
         result = {
             "dbs": []
         }
 
         for i in self.exec_sql("SELECT datname FROM pg_database;"):
             result["dbs"].append(i[0])
-        self.conn.close()
-        self.conn = old_conn
 
         return result
