@@ -61,4 +61,5 @@ class PostgreDB:
         for i in self.exec_sql("SELECT datname FROM pg_database;"):
             result["dbs"].append(i[0])
 
+        result["dbs"] = sorted(result["dbs"])
         return result
