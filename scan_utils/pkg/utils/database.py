@@ -44,14 +44,19 @@ class PostgreDB:
         return conn
 
     def exec_sql(self, sql, fetch="Many", num=0):
+        result = []
         cursor = self.conn.cursor()
         cursor.execute(sql)
         if fetch == "Many":
-            return cursor.fetchall()
+            if cursor.description is not None:
+                result = cursor.fetchall()
         elif fetch == "One":
-            return cursor.fetchone()
+            if cursor.description is not None:
+                result = cursor.fetchone()
         else:
-            return cursor.fetchmany(num)
+            if cursor.description is not None:
+                result = cursor.fetchmany(num)
+        return result
 
     def get_meta_info(self):
         result = {
