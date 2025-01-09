@@ -5,9 +5,10 @@ import socket
 from scan_utils.pkg.framework import logger
 from scan_utils.pkg.vars import global_var
 
+
 class SHELL:
 
-    def __init__(self, ssh = "", passwd = "", local = False):
+    def __init__(self, ssh="", passwd="", local=False):
         # self.local是一个开关，用于控制是远程shell还是本地shell
         # ssh = SSH(credential_info["host"], credential_info["port"], credential_info["username"], credential_info["password"])
         self.local = local
@@ -15,14 +16,15 @@ class SHELL:
         self.sudo_passwd = passwd
         self.comment_pattern = re.compile(r"^\s*#")
 
-    def exec_shell(self, command, get_error=False, get_comments = False, timeout = 30, get_dict = False, **kwargs):
+    def exec_shell(self, command, get_error=False, get_comments=False, timeout=30, get_dict=False, **kwargs):
 
         if self.local:
             # common args: env, cwd
             result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)
             if get_error:
-                ret = [i for i in result.stderr.decode().split('\n') if i != '']
-                return ret
+                out = [i for i in result.stdout.decode().split('\n') if i != '']
+                err = [i for i in result.stderr.decode().split('\n') if i != '']
+                return out + err
             else:
                 ret = [i for i in result.stdout.decode().split('\n') if i != '']
                 return ret
@@ -51,15 +53,16 @@ class SHELL:
             try:
                 if ssh.sudo == True:
 
-                    command = "sudo -S -p '' %s -c 'source /etc/profile &>/dev/null;export LANG=en_US.UTF-8;%s'" % (sudo_shell, command.replace("'", "'\\''"))
-                    result = ssh.exec_command(command, timeout = timeout)
+                    command = "sudo -S -p '' %s -c 'source /etc/profile &>/dev/null;export LANG=en_US.UTF-8;%s'" % (
+                        sudo_shell, command.replace("'", "'\\''"))
+                    result = ssh.exec_command(command, timeout=timeout)
 
                     result[0].write('%s\n' % sudo_passwd)
                     result[0].flush()
 
                 else:
                     command = "source /etc/profile &>/dev/null;" + command
-                    result = ssh.exec_command(command, timeout = timeout, environment = {"LANG": "en_US.UTF-8"})
+                    result = ssh.exec_command(command, timeout=timeout, environment={"LANG": "en_US.UTF-8"})
 
                 if get_dict:
                     ret = {
@@ -70,13 +73,15 @@ class SHELL:
                     return ret
 
                 if get_error:
-                    ret = [i for i in result[2].read().decode().split('\n') if i.strip() != '']
+                    out = [i for i in result[1].read().decode().split('\n') if i.strip() != '']
+                    err = [i for i in result[2].read().decode().split('\n') if i.strip() != '']
+                    ret = out + err
                 else:
                     ret = [i for i in result[1].read().decode().split('\n') if i.strip() != '']
 
             except socket.timeout:
                 ret = []
-                logger.error("host：%s，shell命令执行超时：%s" %(self.ssh.host, command))
+                logger.error("host：%s，shell命令执行超时：%s" % (self.ssh.host, command))
 
             except Exception:
                 ret = []
@@ -84,13 +89,13 @@ class SHELL:
                 # raise BusinessException("shell命令执行失败：%s" %command)
 
             if not get_comments:
-                ret = [ i for i in ret if not self.comment_pattern.search(i) ]
+                ret = [i for i in ret if not self.comment_pattern.search(i)]
 
             if get_dict:
                 return {}
             return MyList(ret)
 
-    def get_file_content(self, filename, type = "", comments = "#", timeout = 30):
+    def get_file_content(self, filename, type="", comments="#", timeout=30):
         """
         封装执行shell命令的方法，实现了下面的功能：
             1.从位置参数获取ssh信息，建立ssh连接
@@ -108,17 +113,17 @@ class SHELL:
         if type == "xml":
             pattern = "<!--[\s\S]*?-->(\s*)?|(?:^|\n)\s*(?=\n)"
         else:
-            pattern = r"(?:^|\n)(\s*[%s].*|\s*)(?=\n)" %comments
+            pattern = r"(?:^|\n)(\s*[%s].*|\s*)(?=\n)" % comments
 
         try:
             if ssh.sudo == True:
                 command = "sudo -S -p '' -i cat %s" % filename
-                result = ssh.exec_command(command, timeout = timeout, environment = {"LANG": "en_US.UTF-8"})
+                result = ssh.exec_command(command, timeout=timeout, environment={"LANG": "en_US.UTF-8"})
                 result[0].write('%s\n' % sudo_passwd)
                 result[0].flush()
 
             else:
-                result = ssh.exec_command("cat %s" % filename, timeout = timeout, environment = {"LANG": "en_US.UTF-8"})
+                result = ssh.exec_command("cat %s" % filename, timeout=timeout, environment={"LANG": "en_US.UTF-8"})
 
             ret = re.sub(pattern, "", result[1].read().decode())
 
@@ -149,8 +154,9 @@ class SHELL:
         command = r'echo "";for i in `ls /sys/class/net | grep -v lo`;do path=`readlink "/sys/class/net/$i"`;if ! echo $path | grep -q virtual && ! cat /sys/class/net/$i/operstate | grep -q down;then ip addr show $i;fi;done'
         result = ' '.join(self.exec_shell(command))
 
-        pattern = r"inet\s+(%s)" %global_var.ip_pattern
-        local_ip = [item.group(1) for item in list(re.finditer(pattern, result)) if not global_var.except_ip_match.search(item.group(1))]
+        pattern = r"inet\s+(%s)" % global_var.ip_pattern
+        local_ip = [item.group(1) for item in list(re.finditer(pattern, result)) if
+                    not global_var.except_ip_match.search(item.group(1))]
 
         return list(set(local_ip))
 
@@ -163,16 +169,16 @@ class SHELL:
         """
         ret = []
 
-        #如果hostname本身就是ip地址，则直接返回一个列表
+        # 如果hostname本身就是ip地址，则直接返回一个列表
         if global_var.ip_match.search(hostname):
             return [hostname]
 
-        result = self.exec_shell("getent ahostsv4 %s" %hostname)
+        result = self.exec_shell("getent ahostsv4 %s" % hostname)
         for line in result:
             ret.append(line.split()[0])
 
         if not ret:
-            result = self.exec_shell("ping -c 1 %s" %hostname)
+            result = self.exec_shell("ping -c 1 %s" % hostname)
             ip = re.search(global_var.ip_pattern, ''.join(result))
             if ip:
                 ret.append(ip.group())
