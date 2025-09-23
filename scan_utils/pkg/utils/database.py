@@ -40,6 +40,7 @@ class PostgreDB:
             password=self.db_info["passwd"],
             host=self.db_info["host"],
             port=self.db_info["port"],
+            channel_binding="disable",
         )
         return conn
 

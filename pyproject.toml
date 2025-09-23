@@ -1,15 +1,16 @@
 [build-system]
-requires = ["setuptools>=42"]
+requires = ["setuptools>=69", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "scan-utils"
-version = "0.0.13"
+version = "0.0.14"
 authors = [
     { name = "LiamLea", email = "liweixiliang@gmail.com" },
 ]
 description = "uitls for scan service"
 readme = "README.md"
+license = { file = "LICENSE" }
 requires-python = ">=3.6"
 classifiers = [
     "Programming Language :: Python :: 3",
