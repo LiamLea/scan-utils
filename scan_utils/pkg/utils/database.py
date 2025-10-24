@@ -44,19 +44,25 @@ class PostgreDB:
         )
         return conn
 
-    def exec_sql(self, sql, fetch="Many", num=0):
+    def exec_sql(self, sql, fetch="Many", num=0, header=False):
         result = []
         cursor = self.conn.cursor()
         cursor.execute(sql)
+
+        headers = []
+        if header == True and cursor.description is not None:
+            headers = [tuple(desc[0] for desc in cursor.description)]
+
         if fetch == "Many":
             if cursor.description is not None:
-                result = cursor.fetchall()
+                result = headers + cursor.fetchall()
         elif fetch == "One":
             if cursor.description is not None:
-                result = cursor.fetchone()
+                result = headers + cursor.fetchone()
         else:
             if cursor.description is not None:
-                result = cursor.fetchmany(num)
+                result = headers + cursor.fetchmany(num)
+
         return result
 
     def get_meta_info(self):
